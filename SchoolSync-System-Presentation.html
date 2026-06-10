@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SchoolSync ERP — Enterprise Presentation</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Sans:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy: #0c1929;
+      --navy-soft: #152238;
+      --blue: #1d4ed8;
+      --blue-bright: #3b82f6;
+      --cyan: #06b6d4;
+      --teal: #14b8a6;
+      --white: #ffffff;
+      --off: #f4f7fb;
+      --line: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
+      --slide-w: 1280px;
+      --slide-h: 720px;
+      --pad: 48px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%; overflow: hidden;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: #0a0f18;
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .deck {
+      width: 100vw; height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ─── Slide shell ─── */
+    .slide {
+      display: none;
+      flex-direction: column;
+      width: min(var(--slide-w), 96vw);
+      height: min(var(--slide-h), calc(96vw * 9 / 16));
+      max-height: 92vh;
+      background: var(--white);
+      border-radius: 4px;
+      box-shadow: 0 32px 80px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.06);
+      position: relative;
+      overflow: hidden;
+    }
+    .slide.active { display: flex; animation: slideIn .45s cubic-bezier(.22,1,.36,1); }
+    @keyframes slideIn {
+      from { opacity: 0; transform: scale(.985); }
+      to { opacity: 1; transform: none; }
+    }
+
+    /* Dark variant */
+    .slide.dark {
+      background: linear-gradient(155deg, #0c1929 0%, #111d33 50%, #0a1628 100%);
+      color: #f1f5f9;
+    }
+    .slide.dark .chrome { border-color: rgba(255,255,255,.08); }
+    .slide.dark .chrome-logo text { fill: #f1f5f9; }
+    .slide.dark .chrome-right { color: rgba(255,255,255,.45); }
+    .slide.dark .foot { border-color: rgba(255,255,255,.08); color: rgba(255,255,255,.4); }
+    .slide.dark .kicker { color: var(--cyan); }
+    .slide.dark h1 { color: #fff; }
+    .slide.dark .lead { color: rgba(255,255,255,.65); }
+
+    /* Section divider */
+    .slide.section.dark::after {
+      content: '';
+      position: absolute; right: -80px; bottom: -80px;
+      width: 400px; height: 400px; border-radius: 50%;
+      border: 1px solid rgba(59,130,246,.15);
+      pointer-events: none;
+    }
+    .slide.section .section-num {
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: 8rem; font-weight: 700; line-height: 1;
+      background: linear-gradient(180deg, rgba(59,130,246,.35), transparent);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      margin-bottom: 8px;
+    }
+
+    /* ─── Chrome (header bar) ─── */
+    .chrome {
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px var(--pad) 16px;
+      border-bottom: 1px solid var(--line);
+    }
+    .chrome-right {
+      font-size: 11px; font-weight: 600; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--muted);
+    }
+    .slide.dark .chrome { background: rgba(0,0,0,.15); }
+
+    /* ─── Content area ─── */
+    .content {
+      flex: 1; min-height: 0;
+      padding: 28px var(--pad) 20px;
+      display: flex; flex-direction: column;
+      position: relative; z-index: 1;
+    }
+    .content.center { justify-content: center; align-items: center; text-align: center; }
+
+    .kicker {
+      font-size: 11px; font-weight: 700; letter-spacing: .14em;
+      text-transform: uppercase; color: var(--blue);
+      margin-bottom: 10px;
+    }
+    h1 {
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: clamp(1.75rem, 3vw, 2.35rem);
+      font-weight: 700; line-height: 1.15;
+      letter-spacing: -.02em; color: var(--navy);
+      max-width: 900px;
+    }
+    h1 .accent { color: var(--blue); }
+    .lead {
+      font-size: 15px; line-height: 1.65; color: var(--muted);
+      margin-top: 12px; max-width: 780px;
+    }
+    .content-body { flex: 1; min-height: 0; margin-top: 24px; display: flex; flex-direction: column; justify-content: center; }
+
+    /* ─── Footer ─── */
+    .foot {
+      flex-shrink: 0;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px var(--pad);
+      border-top: 1px solid var(--line);
+      font-size: 11px; color: var(--muted);
+    }
+    .foot strong { color: var(--navy); font-weight: 600; }
+    .slide.dark .foot strong { color: rgba(255,255,255,.7); }
+
+    /* ─── Components ─── */
+    .accent-bar {
+      position: absolute; left: 0; top: 0; bottom: 0; width: 5px;
+      background: linear-gradient(180deg, var(--blue), var(--cyan));
+    }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+
+    .panel {
+      background: var(--off); border: 1px solid var(--line);
+      border-radius: 12px; padding: 20px 22px;
+      position: relative;
+    }
+    .slide.dark .panel {
+      background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.08);
+    }
+    .panel h3 {
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: 14px; font-weight: 700; margin-bottom: 10px;
+      color: var(--navy); display: flex; align-items: center; gap: 8px;
+    }
+    .slide.dark .panel h3 { color: #f1f5f9; }
+    .panel p, .panel li { font-size: 13px; line-height: 1.55; color: var(--muted); }
+    .panel ul { padding-left: 18px; }
+    .panel li { margin-bottom: 6px; }
+    .panel .ico {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: grid; place-items: center; font-size: 16px; margin-bottom: 12px;
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+    }
+    .slide.dark .panel .ico { background: rgba(59,130,246,.15); }
+
+    .panel.neg { border-left: 3px solid #ef4444; }
+    .panel.pos { border-left: 3px solid var(--teal); }
+
+    .metric {
+      text-align: center; padding: 22px 16px;
+      background: var(--off); border: 1px solid var(--line); border-radius: 12px;
+    }
+    .slide.dark .metric { background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.08); }
+    .metric .val {
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: 2rem; font-weight: 700; color: var(--blue);
+      line-height: 1; margin-bottom: 6px;
+    }
+    .slide.dark .metric .val { color: #60a5fa; }
+    .metric .lbl { font-size: 12px; color: var(--muted); font-weight: 500; }
+
+    .agenda { list-style: none; counter-reset: ag; }
+    .agenda li {
+      counter-increment: ag;
+      display: grid; grid-template-columns: 44px 1fr auto;
+      align-items: center; gap: 16px;
+      padding: 14px 0; border-bottom: 1px solid var(--line);
+      font-size: 14px; font-weight: 500; color: var(--navy);
+    }
+    .agenda li::before {
+      content: counter(ag, decimal-leading-zero);
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: 13px; font-weight: 700; color: var(--blue);
+      background: #eff6ff; width: 36px; height: 36px; border-radius: 8px;
+      display: grid; place-items: center;
+    }
+    .agenda li span:last-child { font-size: 12px; color: var(--muted); font-weight: 400; }
+
+    .pipeline {
+      display: flex; align-items: stretch; gap: 0; margin: 8px 0;
+    }
+    .pipe-step {
+      flex: 1; text-align: center; padding: 16px 10px;
+      background: var(--off); border: 1px solid var(--line);
+      position: relative; font-size: 12px; font-weight: 600; color: var(--navy);
+    }
+    .pipe-step:first-child { border-radius: 10px 0 0 10px; }
+    .pipe-step:last-child { border-radius: 0 10px 10px 0; }
+    .pipe-step small { display: block; font-weight: 400; color: var(--muted); margin-top: 4px; font-size: 10px; }
+    .pipe-step.active { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
+    .pipe-step.active small { color: rgba(255,255,255,.75); }
+    .pipe-step + .pipe-step { border-left: none; }
+    .slide.dark .pipe-step { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.1); color: #e2e8f0; }
+    .slide.dark .pipe-step.active { background: #2563eb; }
+
+    .steps { display: flex; flex-direction: column; gap: 10px; }
+    .step {
+      display: grid; grid-template-columns: 32px 1fr; gap: 14px; align-items: start;
+    }
+    .step-n {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--blue); color: #fff;
+      font-size: 12px; font-weight: 700;
+      display: grid; place-items: center;
+    }
+    .step strong { font-size: 13px; color: var(--navy); display: block; margin-bottom: 2px; }
+    .slide.dark .step strong { color: #f1f5f9; }
+    .step span { font-size: 12px; color: var(--muted); line-height: 1.45; }
+
+    .role-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+    .role {
+      text-align: center; padding: 18px 12px;
+      border: 1px solid var(--line); border-radius: 12px; background: var(--white);
+    }
+    .slide.dark .role { background: rgba(255,255,255,.03); border-color: rgba(255,255,255,.08); }
+    .role .dot {
+      width: 44px; height: 44px; border-radius: 12px; margin: 0 auto 10px;
+      display: grid; place-items: center; font-size: 11px; font-weight: 800;
+    }
+    .role h4 { font-size: 12px; font-weight: 700; margin-bottom: 4px; color: var(--navy); }
+    .slide.dark .role h4 { color: #f1f5f9; }
+    .role p { font-size: 10px; color: var(--muted); line-height: 1.4; }
+
+    .phase-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .phase {
+      display: flex; gap: 12px; align-items: flex-start;
+      padding: 12px 14px; border-radius: 10px;
+      background: var(--off); border: 1px solid var(--line);
+    }
+    .slide.dark .phase { background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.08); }
+    .phase .n {
+      flex-shrink: 0; width: 32px; height: 32px; border-radius: 8px;
+      background: var(--blue); color: #fff;
+      font-size: 13px; font-weight: 700;
+      display: grid; place-items: center;
+    }
+    .phase h4 { font-size: 12px; font-weight: 700; color: var(--navy); margin-bottom: 2px; }
+    .slide.dark .phase h4 { color: #f1f5f9; }
+    .phase p { font-size: 11px; color: var(--muted); line-height: 1.35; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th {
+      text-align: left; padding: 10px 12px;
+      background: var(--navy); color: #fff; font-weight: 600;
+      font-size: 11px; letter-spacing: .03em;
+    }
+    th:first-child { border-radius: 8px 0 0 0; }
+    th:last-child { border-radius: 0 8px 0 0; }
+    td { padding: 9px 12px; border-bottom: 1px solid var(--line); color: var(--text); }
+    tr:nth-child(even) td { background: var(--off); }
+    .slide.dark td { border-color: rgba(255,255,255,.06); color: #cbd5e1; }
+    .slide.dark tr:nth-child(even) td { background: rgba(255,255,255,.02); }
+
+    .callout {
+      margin-top: 14px; padding: 12px 16px; border-radius: 8px;
+      background: #fffbeb; border: 1px solid #fde68a;
+      font-size: 12px; color: #92400e; line-height: 1.5;
+    }
+    .slide.dark .callout { background: rgba(245,158,11,.1); border-color: rgba(245,158,11,.25); color: #fcd34d; }
+
+    .hero-title {
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: clamp(2.5rem, 5vw, 3.5rem);
+      font-weight: 700; line-height: 1.08; letter-spacing: -.03em;
+      color: #fff; max-width: 800px;
+    }
+    .hero-title span { color: #60a5fa; }
+    .hero-sub { font-size: 18px; color: rgba(255,255,255,.7); margin-top: 20px; max-width: 560px; line-height: 1.6; }
+    .hero-meta { display: flex; gap: 32px; margin-top: 40px; }
+    .hero-meta div { border-left: 2px solid var(--cyan); padding-left: 16px; }
+    .hero-meta b { display: block; font-size: 13px; color: #fff; margin-bottom: 2px; }
+    .hero-meta span { font-size: 12px; color: rgba(255,255,255,.5); }
+
+    .orb { position: absolute; border-radius: 50%; filter: blur(80px); pointer-events: none; }
+    .orb-1 { width: 500px; height: 500px; background: rgba(37,99,235,.2); top: -200px; right: -100px; }
+    .orb-2 { width: 300px; height: 300px; background: rgba(6,182,212,.12); bottom: -100px; left: 10%; }
+
+  /* Controls */
+    .controls {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      display: flex; align-items: center; gap: 8px; z-index: 300;
+      background: rgba(12,25,41,.92); border: 1px solid rgba(255,255,255,.1);
+      padding: 8px 14px; border-radius: 12px; backdrop-filter: blur(16px);
+    }
+    .controls button {
+      width: 36px; height: 36px; border-radius: 8px; border: none;
+      background: rgba(255,255,255,.08); color: #fff; cursor: pointer; font-size: 18px;
+    }
+    .controls button:hover { background: var(--blue); }
+    .controls span { color: rgba(255,255,255,.6); font-size: 12px; font-weight: 600; min-width: 52px; text-align: center; }
+    .hint {
+      position: fixed; top: 16px; right: 16px; z-index: 300;
+      font-size: 10px; color: rgba(255,255,255,.4);
+      background: rgba(12,25,41,.8); padding: 6px 12px; border-radius: 6px;
+    }
+
+    @media print {
+      body { overflow: visible; background: #fff; }
+      .deck { display: block; height: auto; }
+      .slide { display: flex !important; page-break-after: always; width: 100%; height: 100vh; max-height: none; border-radius: 0; box-shadow: none; }
+      .controls, .hint { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="hint">← → Navigate · F11 Fullscreen · Ctrl+P Export PDF</div>
+  <div class="deck" id="deck"></div>
+  <div class="controls">
+    <button id="prev" aria-label="Previous">‹</button>
+    <span id="counter">1 / 1</span>
+    <button id="next" aria-label="Next">›</button>
+    <button id="fs" aria-label="Fullscreen">⛶</button>
+  </div>
+
+  <template id="logo-svg">
+    <svg class="chrome-logo" width="148" height="32" viewBox="0 0 180 40" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#3B82F6"/><stop offset="100%" stop-color="#06B6D4"/></linearGradient>
+      </defs>
+      <path d="M18 4 L30 9 L30 20 C30 26.5 25 32 18 35.5 C11 32 6 26.5 6 20 L6 9 Z" fill="none" stroke="url(#lg)" stroke-width="1.6"/>
+      <text x="42" y="26" font-family="Instrument Sans,sans-serif" font-size="18" font-weight="600" fill="#0f172a">School</text>
+      <text x="103" y="26" font-family="Instrument Sans,sans-serif" font-size="18" font-weight="700" fill="#1d4ed8">Sync</text>
+    </svg>
+  </template>
+
+  <script>
+    const LOGO = document.getElementById('logo-svg').innerHTML;
+
+    function chrome(right = 'Enterprise Briefing', dark = false) {
+      return `<div class="chrome">
+        ${LOGO}
+        <span class="chrome-right">${right}</span>
+      </div>`;
+    }
+    function foot(n, total, note = 'SchoolSync ERP · Confidential') {
+      return `<div class="foot"><span><strong>SchoolSync</strong> · ${note}</span><span>Slide ${n} of ${total}</span></div>`;
+    }
+
+    const TOTAL = 22;
+    const slides = [
+      /* 1 COVER */
+      `<section class="slide dark active">
+        <div class="orb orb-1"></div><div class="orb orb-2"></div>
+        <div class="accent-bar"></div>
+        <div class="chrome" style="border:none;background:transparent">${LOGO.replace('#0f172a','#f1f5f9').replace('#1d4ed8','#60a5fa')}</div>
+        <div class="content center" style="padding-top:0">
+          <p class="kicker" style="color:#22d3ee">Enterprise School Management Platform</p>
+          <h1 class="hero-title">School<span>Sync</span> ERP</h1>
+          <p class="hero-sub">Unified platform for multi-branch school operations — admissions, finance, academics, and stakeholder portals.</p>
+          <div class="hero-meta">
+            <div><b>Prepared for</b><span>Organizational Leadership</span></div>
+            <div><b>Scope</b><span>Full system overview & implementation</span></div>
+            <div><b>Date</b><span>2026</span></div>
+          </div>
+        </div>
+        ${foot(1, TOTAL, 'Executive Presentation')}
+      </section>`,
+
+      /* 2 AGENDA */
+      `<section class="slide">
+        ${chrome('Agenda')}
+        <div class="content">
+          <p class="kicker">Overview</p>
+          <h1>Today's <span class="accent">agenda</span></h1>
+          <div class="content-body">
+            <ol class="agenda">
+              <li>Executive summary <span>Platform value & scale</span></li>
+              <li>Business challenge <span>Why schools need digital transformation</span></li>
+              <li>Platform architecture <span>How SchoolSync works technically</span></li>
+              <li>Stakeholder ecosystem <span>5 role-based portals</span></li>
+              <li>Core workflows <span>Admissions, fees, attendance, academics</span></li>
+              <li>Implementation roadmap <span>8 phases · 97 guided steps</span></li>
+              <li>Enterprise capabilities <span>Multi-branch, security, reporting</span></li>
+              <li>Next steps <span>Demo, pilot, and go-live</span></li>
+            </ol>
+          </div>
+        </div>
+        ${foot(2, TOTAL)}
+      </section>`,
+
+      /* 3 EXEC SUMMARY */
+      `<section class="slide">
+        ${chrome('Executive Summary')}
+        <div class="content">
+          <p class="kicker">At a glance</p>
+          <h1>One platform. <span class="accent">Every school function.</span></h1>
+          <p class="lead">SchoolSync is a cloud ERP that replaces fragmented tools with a single source of truth — from the boardroom dashboard to the parent mobile browser.</p>
+          <div class="content-body">
+            <div class="grid-4">
+              <div class="metric"><div class="val">97</div><div class="lbl">Documented setup steps</div></div>
+              <div class="metric"><div class="val">50+</div><div class="lbl">Integrated screens</div></div>
+              <div class="metric"><div class="val">5</div><div class="lbl">Role-based portals</div></div>
+              <div class="metric"><div class="val">16+</div><div class="lbl">Report categories</div></div>
+            </div>
+          </div>
+        </div>
+        ${foot(3, TOTAL)}
+      </section>`,
+
+      /* 4 SECTION - Challenge */
+      `<section class="slide section dark">
+        <div class="accent-bar"></div>
+        ${chrome('Section 01', true)}
+        <div class="content center">
+          <div class="section-num">01</div>
+          <h1 style="color:#fff;font-size:2.5rem">The Business<br/>Challenge</h1>
+        </div>
+        ${foot(4, TOTAL)}
+      </section>`,
+
+      /* 5 PROBLEM */
+      `<section class="slide">
+        ${chrome('Business Challenge')}
+        <div class="content">
+          <p class="kicker">Problem statement</p>
+          <h1>Schools lose revenue & control with <span class="accent">fragmented systems</span></h1>
+          <div class="content-body grid-2">
+            <div class="panel neg"><h3>❌ Current state</h3><ul>
+              <li>Fee tracking in Excel — collection gaps go unnoticed</li>
+              <li>Paper attendance — parents uninformed until report day</li>
+              <li>Manual admissions — lost applications, no audit trail</li>
+              <li>Each branch runs different processes</li>
+              <li>No real-time visibility for ownership</li>
+            </ul></div>
+            <div class="panel pos"><h3>✅ Target state with SchoolSync</h3><ul>
+              <li>Automated fee billing + online payments</li>
+              <li>Digital attendance → instant parent portal update</li>
+              <li>Apply → Approve → Enroll digital pipeline</li>
+              <li>Unified org dashboard across all branches</li>
+              <li>Role-based portals for every stakeholder</li>
+            </ul></div>
+          </div>
+        </div>
+        ${foot(5, TOTAL)}
+      </section>`,
+
+      /* 6 SECTION - Solution */
+      `<section class="slide section dark">
+        <div class="accent-bar"></div>
+        ${chrome('Section 02', true)}
+        <div class="content center">
+          <div class="section-num">02</div>
+          <h1 style="color:#fff;font-size:2.5rem">Platform<br/>Architecture</h1>
+        </div>
+        ${foot(6, TOTAL)}
+      </section>`,
+
+      /* 7 WHAT IS */
+      `<section class="slide">
+        ${chrome('Platform Overview')}
+        <div class="content">
+          <p class="kicker">Solution</p>
+          <h1>What is <span class="accent">SchoolSync</span>?</h1>
+          <p class="lead">A multi-tenant SaaS ERP — each school operates in an isolated environment with its own branding, data, and users, while organization owners oversee all branches centrally.</p>
+          <div class="content-body grid-3">
+            <div class="panel"><div class="ico">☁️</div><h3>Cloud-native</h3><p>Browser access, no server maintenance. Deploy on Vercel or private cloud.</p></div>
+            <div class="panel"><div class="ico">🏢</div><h3>Multi-tenant</h3><p>Each school = separate tenant. Data isolation with shared platform infrastructure.</p></div>
+            <div class="panel"><div class="ico">🎨</div><h3>White-label</h3><p>Brand Studio — per-school logo, colors, and public website.</p></div>
+          </div>
+        </div>
+        ${foot(7, TOTAL)}
+      </section>`,
+
+      /* 8 ARCHITECTURE */
+      `<section class="slide">
+        ${chrome('Architecture')}
+        <div class="content">
+          <p class="kicker">How it works</p>
+          <h1>System <span class="accent">data flow</span></h1>
+          <div class="content-body">
+            <div class="pipeline">
+              <div class="pipe-step">User<small>Web browser</small></div>
+              <div class="pipe-step">Login<small>JWT + 2FA</small></div>
+              <div class="pipe-step active">RBAC<small>Role router</small></div>
+              <div class="pipe-step">Portal<small>Scoped UI</small></div>
+              <div class="pipe-step">API<small>REST backend</small></div>
+              <div class="pipe-step">Database<small>Tenant data</small></div>
+            </div>
+            <div class="grid-2" style="margin-top:16px">
+              <div class="panel"><h3>Login routing</h3><p>Super Admin → Org Dashboard · Admin → School Dashboard · Teacher → Teacher Portal · Student → Student Portal · Parent → Parent Portal</p></div>
+              <div class="panel"><h3>Public endpoints</h3><p>/apply (admissions) · /school/:slug (public site) · /demo-register (trial) · No login required</p></div>
+            </div>
+          </div>
+        </div>
+        ${foot(8, TOTAL)}
+      </section>`,
+
+      /* 9 SECURITY */
+      `<section class="slide">
+        ${chrome('Security & Compliance')}
+        <div class="content">
+          <p class="kicker">Enterprise readiness</p>
+          <h1>Security <span class="accent">framework</span></h1>
+          <div class="content-body grid-2">
+            <div class="panel"><h3>🔐 Authentication</h3><ul>
+              <li>JWT session-based login</li>
+              <li>Optional Two-Factor Authentication (2FA)</li>
+              <li>Password reset via email</li>
+              <li>Demo/trial expiry enforcement</li>
+            </ul></div>
+            <div class="panel"><h3>🛡️ Authorization</h3><ul>
+              <li>Role-Based Access Control (RBAC)</li>
+              <li>Granular permissions per module</li>
+              <li>5 primary roles + custom roles</li>
+              <li>Tenant isolation — schools cannot see each other's data</li>
+            </ul></div>
+            <div class="panel"><h3>📋 Audit & governance</h3><ul>
+              <li>Super Admin audit logs</li>
+              <li>School activation / deactivation controls</li>
+              <li>Subscription plan management</li>
+            </ul></div>
+            <div class="panel"><h3>🏫 Account lifecycle</h3><ul>
+              <li>5-day demo trial (self-service register)</li>
+              <li>Paid plan upgrade on same account</li>
+              <li>Data retained through trial → paid transition</li>
+            </ul></div>
+          </div>
+        </div>
+        ${foot(9, TOTAL)}
+      </section>`,
+
+      /* 10 SECTION STAKEHOLDERS */
+      `<section class="slide section dark">
+        <div class="accent-bar"></div>
+        ${chrome('Section 03', true)}
+        <div class="content center">
+          <div class="section-num">03</div>
+          <h1 style="color:#fff;font-size:2.5rem">Stakeholder<br/>Ecosystem</h1>
+        </div>
+        ${foot(10, TOTAL)}
+      </section>`,
+
+      /* 11 ROLES */
+      `<section class="slide">
+        ${chrome('Stakeholders')}
+        <div class="content">
+          <p class="kicker">Access model</p>
+          <h1>Five dedicated <span class="accent">portals</span></h1>
+          <div class="content-body">
+            <div class="role-grid">
+              <div class="role"><div class="dot" style="background:#ffedd5;color:#c2410c">SA</div><h4>Super Admin</h4><p>Platform · schools · org analytics</p></div>
+              <div class="role"><div class="dot" style="background:#dbeafe;color:#1d4ed8">AD</div><h4>School Admin</h4><p>Operations · finance · branding</p></div>
+              <div class="role"><div class="dot" style="background:#ccfbf1;color:#0f766e">TC</div><h4>Teacher</h4><p>Classes · attendance · LMS · exams</p></div>
+              <div class="role"><div class="dot" style="background:#dcfce7;color:#15803d">ST</div><h4>Student</h4><p>Courses · fees · results · exams</p></div>
+              <div class="role"><div class="dot" style="background:#fce7f3;color:#be185d">PR</div><h4>Parent</h4><p>Children · fees · homework · alerts</p></div>
+            </div>
+            <div class="callout" style="margin-top:16px">Each user sees only their permitted modules — configured via Roles & Permissions with Select All / per-module granularity.</div>
+          </div>
+        </div>
+        ${foot(11, TOTAL)}
+      </section>`,
+
+      /* 12 SECTION WORKFLOWS */
+      `<section class="slide section dark">
+        <div class="accent-bar"></div>
+        ${chrome('Section 04', true)}
+        <div class="content center">
+          <div class="section-num">04</div>
+          <h1 style="color:#fff;font-size:2.5rem">Core<br/>Workflows</h1>
+        </div>
+        ${foot(12, TOTAL)}
+      </section>`,
+
+      /* 13 ADMISSIONS */
+      `<section class="slide">
+        ${chrome('Workflow — Admissions')}
+        <div class="content">
+          <p class="kicker">End-to-end process</p>
+          <h1>Digital <span class="accent">admission pipeline</span></h1>
+          <div class="content-body">
+            <div class="pipeline">
+              <div class="pipe-step">Apply<small>/apply form</small></div>
+              <div class="pipe-step">Pending<small>ADM number</small></div>
+              <div class="pipe-step">Review<small>Admin panel</small></div>
+              <div class="pipe-step active">Approve<small>Accept app</small></div>
+              <div class="pipe-step active">Enroll<small>Create accounts</small></div>
+              <div class="pipe-step">Live<small>Portals active</small></div>
+            </div>
+            <div class="grid-2" style="margin-top:14px">
+              <div class="panel"><h3>On enrollment, system creates</h3><ul>
+                <li>Student record with roll number</li>
+                <li>Student portal credentials</li>
+                <li>Parent portal + child link</li>
+                <li>Parent notification email</li>
+              </ul></div>
+              <div class="panel"><h3>Critical business rule</h3><p><strong>Approve ≠ Enroll.</strong> Approval only marks acceptance. Enrollment is a separate action that provisions accounts and assigns section/class.</p></div>
+            </div>
+          </div>
+        </div>
+        ${foot(13, TOTAL)}
+      </section>`,
+
+      /* 14 FEES */
+      `<section class="slide">
+        ${chrome('Workflow — Finance')}
+        <div class="content">
+          <p class="kicker">Revenue operations</p>
+          <h1>Fee <span class="accent">lifecycle</span></h1>
+          <div class="content-body">
+            <div class="steps">
+              <div class="step"><div class="step-n">1</div><div><strong>Configure fee structure</strong><span>Monthly fee set at class level; admission fee, discount, scholarship at enrollment</span></div></div>
+              <div class="step"><div class="step-n">2</div><div><strong>Generate monthly bills</strong><span>One-click "Generate Monthly Fee" — all students billed with carry-forward logic</span></div></div>
+              <div class="step"><div class="step-n">3</div><div><strong>Collect payments</strong><span>Cash (Mark as Paid) · Online (Pay Now) · Auto receipts · Fine for overdue</span></div></div>
+              <div class="step"><div class="step-n">4</div><div><strong>Report & forecast</strong><span>Financial Dashboard · Defaulter lists · P&L via Advanced Finance module</span></div></div>
+            </div>
+          </div>
+        </div>
+        ${foot(14, TOTAL)}
+      </section>`,
+
+      /* 15 OPERATIONS */
+      `<section class="slide">
+        ${chrome('Workflow — Academics')}
+        <div class="content">
+          <p class="kicker">Daily operations</p>
+          <h1>Academic <span class="accent">operations suite</span></h1>
+          <div class="content-body grid-3">
+            <div class="panel"><div class="ico">✅</div><h3>Attendance</h3><p>Bulk class marking with presets. Parents see updates in portal within minutes.</p></div>
+            <div class="panel"><div class="ico">📅</div><h3>Timetable</h3><p>Class-wise & teacher-wise schedules. PDF export.</p></div>
+            <div class="panel"><div class="ico">📝</div><h3>Exams & Results</h3><p>Create exams, import marks, download result cards per class.</p></div>
+            <div class="panel"><div class="ico">💻</div><h3>Online Exams</h3><p>Timed assessments, MCQ generator, auto-grading.</p></div>
+            <div class="panel"><div class="ico">📚</div><h3>LMS</h3><p>Modules, lessons, assignments. Students submit; teachers grade.</p></div>
+            <div class="panel"><div class="ico">📖</div><h3>Library & Certs</h3><p>Book catalog, issue/return, certificate generation.</p></div>
+          </div>
+        </div>
+        ${foot(15, TOTAL)}
+      </section>`,
+
+      /* 16 SECTION IMPLEMENTATION */
+      `<section class="slide section dark">
+        <div class="accent-bar"></div>
+        ${chrome('Section 05', true)}
+        <div class="content center">
+          <div class="section-num">05</div>
+          <h1 style="color:#fff;font-size:2.5rem">Implementation<br/>Roadmap</h1>
+        </div>
+        ${foot(16, TOTAL)}
+      </section>`,
+
+      /* 17 PHASES */
+      `<section class="slide">
+        ${chrome('Implementation')}
+        <div class="content">
+          <p class="kicker">Go-live framework</p>
+          <h1>8 phases · <span class="accent">97 steps</span></h1>
+          <div class="content-body phase-grid">
+            <div class="phase"><div class="n">0</div><div><h4>System Setup</h4><p>School provisioning, RBAC, Brand Studio, dashboards</p></div></div>
+            <div class="phase"><div class="n">1</div><div><h4>Foundation</h4><p>Academic Year → Sections → Classes → Courses</p></div></div>
+            <div class="phase"><div class="n">2</div><div><h4>Staff & HR</h4><p>Teachers, employees, leave, payroll, parents</p></div></div>
+            <div class="phase"><div class="n">3</div><div><h4>Students</h4><p>Admissions pipeline + enrollment</p></div></div>
+            <div class="phase"><div class="n">4</div><div><h4>Finance</h4><p>Fee generation, collection, accounting</p></div></div>
+            <div class="phase"><div class="n">5</div><div><h4>Operations</h4><p>Attendance, exams, LMS, library</p></div></div>
+            <div class="phase"><div class="n">6</div><div><h4>Communicate</h4><p>Announcements, SMS, CMS, reports</p></div></div>
+            <div class="phase"><div class="n">7</div><div><h4>Portals</h4><p>Teacher, student, parent activation</p></div></div>
+          </div>
+        </div>
+        ${foot(17, TOTAL)}
+      </section>`,
+
+      /* 18 ENTERPRISE */
+      `<section class="slide">
+        ${chrome('Enterprise')}
+        <div class="content">
+          <p class="kicker">Scale</p>
+          <h1>Built for <span class="accent">organizations</span></h1>
+          <div class="content-body grid-2">
+            <div class="panel"><h3>Multi-branch management</h3><ul>
+              <li>Partner / Organization onboarding</li>
+              <li>Link multiple school tenants</li>
+              <li>Org Owner branch switcher</li>
+              <li>Consolidated org dashboard</li>
+              <li>Revenue forecast across branches</li>
+            </ul></div>
+            <div class="panel"><h3>Reporting & analytics</h3><ul>
+              <li>16+ report categories</li>
+              <li>Comprehensive school KPI dashboard</li>
+              <li>Fee collection & defaulter reports</li>
+              <li>Attendance trends</li>
+              <li>PDF / CSV export on every report</li>
+            </ul></div>
+          </div>
+        </div>
+        ${foot(18, TOTAL)}
+      </section>`,
+
+      /* 19 MODULES TABLE */
+      `<section class="slide">
+        ${chrome('Module Reference')}
+        <div class="content" style="padding-bottom:12px">
+          <p class="kicker">Complete coverage</p>
+          <h1>Integrated <span class="accent">module map</span></h1>
+          <div class="content-body" style="margin-top:16px;overflow:auto">
+            <table>
+              <thead><tr><th>Domain</th><th>Capabilities</th><th>Users</th></tr></thead>
+              <tbody>
+                <tr><td>Academics</td><td>Students, Teachers, Classes, Courses, Admissions, Academic Years</td><td>Admin</td></tr>
+                <tr><td>Finance</td><td>Fees, Online Payments, Financial Mgmt, Advanced Accounting</td><td>Admin, Parent</td></tr>
+                <tr><td>Operations</td><td>Attendance, Exams, LMS, Timetable, Library, Certificates</td><td>Admin, Teacher</td></tr>
+                <tr><td>HR & Payroll</td><td>Employees, Leave, Payroll, Parent Management</td><td>Admin, HR</td></tr>
+                <tr><td>Communication</td><td>Announcements, SMS, Notifications, Public CMS</td><td>All</td></tr>
+                <tr><td>Governance</td><td>RBAC, Brand Studio, Security Center, Org Dashboard</td><td>Leadership</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        ${foot(19, TOTAL)}
+      </section>`,
+
+      /* 20 ROI */
+      `<section class="slide">
+        ${chrome('Business Value')}
+        <div class="content">
+          <p class="kicker">Return on investment</p>
+          <h1>Measurable <span class="accent">outcomes</span></h1>
+          <div class="content-body grid-4">
+            <div class="metric"><div class="val">+30%</div><div class="lbl">Fee collection uplift</div></div>
+            <div class="metric"><div class="val">60%</div><div class="lbl">Less admin workload</div></div>
+            <div class="metric"><div class="val">2 min</div><div class="lbl">Class attendance</div></div>
+            <div class="metric"><div class="val">1</div><div class="lbl">Dashboard for all branches</div></div>
+          </div>
+          <div class="grid-2" style="margin-top:20px">
+            <div class="panel"><h3>For leadership</h3><p>Real-time revenue visibility, branch comparison, data-driven decisions from org dashboard.</p></div>
+            <div class="panel"><h3>For families</h3><p>Parent portal builds trust — attendance, fees, and homework accessible 24/7.</p></div>
+          </div>
+        </div>
+        ${foot(20, TOTAL)}
+      </section>`,
+
+      /* 21 NEXT STEPS */
+      `<section class="slide">
+        ${chrome('Next Steps')}
+        <div class="content">
+          <p class="kicker">Path forward</p>
+          <h1>Recommended <span class="accent">next steps</span></h1>
+          <div class="content-body">
+            <div class="steps">
+              <div class="step"><div class="step-n">1</div><div><strong>Live platform demo</strong><span>Walk through admin dashboard, admission flow, and parent portal with your team</span></div></div>
+              <div class="step"><div class="step-n">2</div><div><strong>Pilot school deployment</strong><span>5-day free trial via /demo-register — full data retained on upgrade</span></div></div>
+              <div class="step"><div class="step-n">3</div><div><strong>Phased rollout</strong><span>Follow 8-phase implementation guide — foundation first, then operations</span></div></div>
+              <div class="step"><div class="step-n">4</div><div><strong>Training & handover</strong><span>Portal Guide with 97 button-level steps for admin team self-service</span></div></div>
+            </div>
+          </div>
+        </div>
+        ${foot(21, TOTAL)}
+      </section>`,
+
+      /* 22 THANK YOU */
+      `<section class="slide dark">
+        <div class="orb orb-1"></div>
+        <div class="accent-bar"></div>
+        <div class="chrome" style="border:none;background:transparent">${LOGO.replace('#0f172a','#f1f5f9').replace('#1d4ed8','#60a5fa')}</div>
+        <div class="content center">
+          <p class="kicker" style="color:#22d3ee">Thank you</p>
+          <h1 class="hero-title" style="font-size:3rem">Questions &<br/><span>discussion</span></h1>
+          <p class="hero-sub" style="margin:24px auto 0">SchoolSync ERP — enterprise school management for the modern organization.</p>
+          <div class="hero-meta" style="justify-content:center;margin-top:36px">
+            <div><b>Demo</b><span>/demo-register</span></div>
+            <div><b>Guide</b><span>97-step Portal Guide</span></div>
+            <div><b>Support</b><span>WhatsApp · Dedicated onboarding</span></div>
+          </div>
+        </div>
+        ${foot(22, TOTAL, 'Thank You')}
+      </section>`
+    ];
+
+    document.getElementById('deck').innerHTML = slides.join('');
+    const slideEls = [...document.querySelectorAll('.slide')];
+    let idx = 0;
+
+    function show(i) {
+      idx = Math.max(0, Math.min(slideEls.length - 1, i));
+      slideEls.forEach((s, n) => s.classList.toggle('active', n === idx));
+      document.getElementById('counter').textContent = (idx + 1) + ' / ' + slideEls.length;
+    }
+
+    document.getElementById('prev').onclick = () => show(idx - 1);
+    document.getElementById('next').onclick = () => show(idx + 1);
+    document.getElementById('fs').onclick = () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+    document.addEventListener('keydown', e => {
+      if (['ArrowRight',' ','PageDown'].includes(e.key)) { e.preventDefault(); show(idx + 1); }
+      if (['ArrowLeft','PageUp'].includes(e.key)) { e.preventDefault(); show(idx - 1); }
+      if (e.key === 'Home') show(0);
+      if (e.key === 'End') show(slideEls.length - 1);
+    });
+    show(0);
+  </script>
+</body>
+</html>
